@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=LinuxViva
+GenericName=Registro Elettronico
+Comment=Classeviva client for Linux
+Exec=linuxviva
+Icon=io.github.giomarco2107.LinuxViva
+Terminal=false
+Type=Application
+Categories=Education;Network;
+StartupNotify=true
+StartupWMClass=linuxviva
+Keywords=scuola;registro;voti;assenze;spaggiari;classeviva;

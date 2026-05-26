@@ -1,0 +1,10 @@
+#!@PYTHON@
+import sys
+import os
+sys.path.insert(0, '@PKGDATADIR@')
+os.chdir('@PKGDATADIR@')
+
+from application import ClassevivaApplication
+
+app = ClassevivaApplication()
+sys.exit(app.run(sys.argv))

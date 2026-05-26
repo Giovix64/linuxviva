@@ -1,0 +1,27 @@
+# Build
+builddir/
+build/
+_build/
+*.egg-info/
+dist/
+__pycache__/
+*.pyc
+*.pyo
+.pyi_cache/
+
+# Meson
+.mesonpy/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Runtime / debug
+/tmp/classeviva_*.json
+*.log
+
+# Packager artefacts
+pkg/
+src.tar.*
