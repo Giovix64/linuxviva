@@ -46,6 +46,8 @@ class NoticeboardView(Adw.Bin):
         self._build_ui()
 
     def _build_ui(self) -> None:
+        self._toast_overlay = Adw.ToastOverlay()
+
         self._stack = Gtk.Stack()
         self._stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
 
@@ -94,7 +96,13 @@ class NoticeboardView(Adw.Bin):
         self._stack.add_named(scroll, "content")
 
         self._stack.set_visible_child_name("loading")
-        self.set_child(self._stack)
+        self._toast_overlay.set_child(self._stack)
+        self.set_child(self._toast_overlay)
+
+    def _show_toast(self, msg: str) -> None:
+        toast = Adw.Toast.new(msg)
+        toast.set_timeout(3)
+        self._toast_overlay.add_toast(toast)
 
     def refresh(self) -> None:
         self._stack.set_visible_child_name("loading")
@@ -145,7 +153,8 @@ class NoticeboardView(Adw.Bin):
         pub_date   = _fmt_date(item.get("pubDT", ""))
         unread     = not item.get("readStatus", True)
         attachments = item.get("attachments") or []
-        needs_action = any([item.get("needJoin"), item.get("needReply"),
+        needs_join   = bool(item.get("needJoin"))
+        needs_action = any([needs_join, item.get("needReply"),
                             item.get("needFile"), item.get("needSign")])
 
         subtitle_parts = []
@@ -168,7 +177,7 @@ class NoticeboardView(Adw.Bin):
                 att_num  = att.get("attachNum", 1)
                 evt_code = item.get("evtCode", "")
                 pub_id   = item.get("pubId", 0)
-                row.add_row(self._make_attachment_row(fname, evt_code, pub_id, att_num))
+                row.add_row(self._make_attachment_row(fname, evt_code, pub_id, att_num, needs_join))
         else:
             row = Adw.ActionRow()
             row.set_title(title)
@@ -188,16 +197,17 @@ class NoticeboardView(Adw.Bin):
             row.add_prefix(icon)
 
         if needs_action:
-            badge = Gtk.Label(label="!")
-            badge.add_css_class("accent")
-            badge.add_css_class("heading")
+            badge = Gtk.Image.new_from_icon_name("dialog-warning-symbolic")
+            badge.add_css_class("warning")
+            badge.set_tooltip_text("Richiede azione (conferma lettura / risposta)")
             badge.set_valign(Gtk.Align.CENTER)
             row.add_suffix(badge)
 
         return row
 
     def _make_attachment_row(self, filename: str, evt_code: str,
-                             pub_id: int, attach_num: int) -> Adw.ActionRow:
+                             pub_id: int, attach_num: int,
+                             needs_join: bool = False) -> Adw.ActionRow:
         row = Adw.ActionRow()
         row.set_title(filename)
 
@@ -212,15 +222,16 @@ class NoticeboardView(Adw.Bin):
         btn.set_valign(Gtk.Align.CENTER)
         btn.connect(
             "clicked",
-            lambda _b, fn=filename, ec=evt_code, pid=pub_id, an=attach_num, r=row:
-                self._download_attachment(fn, ec, pid, an, _b, r),
+            lambda _b, fn=filename, ec=evt_code, pid=pub_id, an=attach_num, nj=needs_join, r=row:
+                self._download_attachment(fn, ec, pid, an, _b, r, nj),
         )
         row.add_suffix(btn)
         return row
 
     def _download_attachment(self, filename: str, evt_code: str,
                               pub_id: int, attach_num: int,
-                              btn: Gtk.Button, row: Adw.ActionRow) -> None:
+                              btn: Gtk.Button, row: Adw.ActionRow,
+                              needs_join: bool = False) -> None:
         btn.set_sensitive(False)
         sp = Gtk.Spinner()
         sp.start()
@@ -230,7 +241,7 @@ class NoticeboardView(Adw.Bin):
         def worker():
             try:
                 data, name = self._client.download_noticeboard_attachment(
-                    evt_code, pub_id, attach_num, filename
+                    evt_code, pub_id, attach_num, filename, need_join=needs_join
                 )
                 GLib.idle_add(_on_done, data, name or filename, None)
             except Exception as exc:
@@ -240,8 +251,11 @@ class NoticeboardView(Adw.Bin):
             btn.set_icon_name("folder-download-symbolic")
             btn.set_sensitive(True)
             if error:
-                row.set_subtitle(f"Errore: {error}")
+                row.set_subtitle(f"⚠ {error[:120]}")
+                self._show_toast(f"Errore download: {error[:80]}")
                 return
+            row.set_subtitle("")
+            self._show_toast(f"Aperto: {name}")
             _save_and_open(data, name)
 
         threading.Thread(target=worker, daemon=True).start()

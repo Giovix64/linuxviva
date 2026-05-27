@@ -7,6 +7,12 @@ install_data(
   install_dir: get_option('datadir') / 'applications',
 )
 
+# App icon
+install_data(
+  'icons/hicolor/scalable/apps' / app_id + '.svg',
+  install_dir: get_option('datadir') / 'icons' / 'hicolor' / 'scalable' / 'apps',
+)
+
 # Launcher wrapper script
 conf = configuration_data()
 conf.set('PKGDATADIR', pkgdatadir)

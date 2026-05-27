@@ -64,18 +64,19 @@ class LoginView(Adw.Bin):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=28)
 
         # ── Hero ──────────────────────────────────────────────────────
-        hero = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        hero = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         hero.set_halign(Gtk.Align.CENTER)
+        hero.set_margin_top(12)
 
-        icon = Gtk.Image.new_from_icon_name("accessories-text-editor-symbolic")
-        icon.set_pixel_size(80)
-        icon.add_css_class("accent")
+        icon = Gtk.Image.new_from_icon_name("io.github.giomarco2107.LinuxViva")
+        icon.set_pixel_size(96)
 
-        title = Gtk.Label(label="Classeviva")
+        title = Gtk.Label(label="ClasseViva")
         title.add_css_class("title-1")
 
-        subtitle = Gtk.Label(label="Accedi al registro elettronico")
+        subtitle = Gtk.Label(label="Registro elettronico Spaggiari")
         subtitle.add_css_class("dim-label")
+        subtitle.add_css_class("body")
 
         hero.append(icon)
         hero.append(title)
@@ -91,7 +92,7 @@ class LoginView(Adw.Bin):
         group.set_title("Credenziali")
 
         self._uid_row = Adw.EntryRow()
-        self._uid_row.set_title("Email o Codice Fiscale")
+        self._uid_row.set_title("Email o Codice Utente")
         self._uid_row.set_input_purpose(Gtk.InputPurpose.EMAIL)
 
         self._pwd_row = Adw.PasswordEntryRow()
@@ -138,6 +139,8 @@ class LoginView(Adw.Bin):
             self._uid_row.set_text(uid)
         if pwd:
             self._pwd_row.set_text(pwd)
+        if uid and pwd:
+            GLib.idle_add(self._do_login)
 
     # ------------------------------------------------------------------
     def _do_login(self) -> None:

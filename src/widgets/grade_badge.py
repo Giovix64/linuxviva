@@ -14,47 +14,48 @@ def _apply_css() -> None:
     css = b"""
     .grade-badge {
         border-radius: 999px;
-        padding: 2px 10px;
+        padding: 3px 11px;
         font-weight: bold;
         font-size: 0.85em;
-        min-width: 32px;
+        min-width: 34px;
     }
     .grade-badge-large {
         border-radius: 999px;
-        padding: 4px 16px;
+        padding: 5px 18px;
         font-weight: bold;
         font-size: 1.1em;
-        min-width: 48px;
+        min-width: 52px;
     }
     .grade-pass {
-        background-color: alpha(@success_color, 0.15);
+        background-color: alpha(@success_color, 0.18);
         color: @success_color;
-        border: 1px solid alpha(@success_color, 0.4);
+        border: 1px solid alpha(@success_color, 0.45);
     }
     .grade-warn {
-        background-color: alpha(@warning_color, 0.15);
+        background-color: alpha(@warning_color, 0.18);
         color: @warning_color;
-        border: 1px solid alpha(@warning_color, 0.4);
+        border: 1px solid alpha(@warning_color, 0.45);
     }
     .grade-fail {
-        background-color: alpha(@error_color, 0.15);
+        background-color: alpha(@error_color, 0.18);
         color: @error_color;
-        border: 1px solid alpha(@error_color, 0.4);
+        border: 1px solid alpha(@error_color, 0.45);
     }
     .grade-neutral {
         background-color: alpha(@view_fg_color, 0.08);
         color: @view_fg_color;
-        border: 1px solid alpha(@view_fg_color, 0.2);
+        border: 1px solid alpha(@view_fg_color, 0.18);
     }
     .stat-card {
-        border-radius: 12px;
-        padding: 16px;
-        background-color: alpha(@card_bg_color, 0.5);
-        border: 1px solid alpha(@card_shade_color, 0.8);
+        border-radius: 14px;
+        padding: 16px 20px;
+        background-color: @card_bg_color;
+        border: 1px solid alpha(@card_shade_color, 0.9);
     }
-    .trend-up   { color: @success_color; font-weight: bold; }
-    .trend-down { color: @error_color;   font-weight: bold; }
+    .trend-up   { color: @success_color; font-weight: bold; font-size: 1.1em; }
+    .trend-down { color: @error_color;   font-weight: bold; font-size: 1.1em; }
     .subject-title { font-weight: bold; }
+    .login-hero-icon { color: @accent_color; }
     """
     provider = Gtk.CssProvider()
     provider.load_from_data(css)

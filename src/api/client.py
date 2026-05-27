@@ -98,13 +98,114 @@ class ClassevivaClient:
                 filename = part[9:].strip().strip('"').strip("'")
         return resp.content, filename
 
+    def _try_get_binary(self, path: str) -> tuple[bytes, str] | None:
+        """GET a path and return (bytes, filename) if it looks like a real file, else None."""
+        if not self._student_id:
+            return None
+        try:
+            with httpx.Client(timeout=60, follow_redirects=True) as client:
+                resp = client.get(f"{BASE_URL}{path}", headers=self._headers())
+            if resp.status_code != 200:
+                return None
+            if resp.content[:4] == b"%PDF" or (
+                resp.headers.get("content-disposition", "") and
+                "json" not in resp.headers.get("content-type", "").lower()
+            ):
+                filename = self._parse_cd_filename(resp.headers.get("content-disposition", ""))
+                return resp.content, filename
+        except Exception:
+            pass
+        return None
+
+    def _try_post_binary(self, path: str) -> tuple[bytes, str] | None:
+        """POST to path (no body) and return (bytes, filename) if it looks like a file, else None."""
+        if not self._student_id:
+            return None
+        try:
+            h = {k: v for k, v in self._headers().items() if k.lower() != "content-type"}
+            with httpx.Client(timeout=60, follow_redirects=True) as client:
+                resp = client.post(f"{BASE_URL}{path}", headers=h)
+            if resp.status_code != 200:
+                return None
+            if resp.content[:4] == b"%PDF":
+                filename = self._parse_cd_filename(resp.headers.get("content-disposition", ""))
+                return resp.content, filename
+        except Exception:
+            pass
+        return None
+
+    def join_noticeboard_notice(self, evt_code: str, pub_id: int) -> None:
+        """Send read confirmation — required by the server before attachment download."""
+        if not self._student_id:
+            return
+        h = {k: v for k, v in self._headers().items() if k.lower() != "content-type"}
+        for join_path in [
+            f"{BASE_URL}/students/{self._student_id}/noticeboard/read/{evt_code}/{pub_id}/join",
+            f"{BASE_URL}/students/{self._student_id}/noticeboard/read/{evt_code}/{pub_id}/sign",
+        ]:
+            try:
+                with httpx.Client(timeout=30) as client:
+                    client.post(join_path, headers=h)
+            except Exception:
+                pass
+
     def download_noticeboard_attachment(
-        self, evt_code: str, pub_id: int, attach_num: int, fallback_name: str = "allegato"
+        self, evt_code: str, pub_id: int, attach_num: int,
+        fallback_name: str = "allegato", need_join: bool = False,
     ) -> tuple[bytes, str]:
-        # POST to read endpoint — also marks the notice as read
-        path = f"/students/{self._student_id}/noticeboard/read/{evt_code}/{pub_id}/{attach_num}"
-        data, name = self._post_bytes(path)
-        return data, name or fallback_name
+        if not self._student_id:
+            raise ClassevivaError("Non autenticato")
+
+        # Send read confirmation first (idempotent — safe to always call)
+        self.join_noticeboard_notice(evt_code, pub_id)
+
+        sid = self._student_id
+        # Try every known endpoint variant for the attachment
+        candidates = [
+            f"/students/{sid}/noticeboard/read/{evt_code}/{pub_id}/{attach_num}",
+            f"/students/{sid}/noticeboard/{evt_code}/{pub_id}/attach/{attach_num}",
+            f"/students/{sid}/noticeboard/attach/{evt_code}/{pub_id}/{attach_num}",
+        ]
+
+        last_debug = b""
+        for path in candidates:
+            # Try POST first (original API), then GET
+            for method in ("post", "get"):
+                try:
+                    h = {k: v for k, v in self._headers().items() if k.lower() != "content-type"}
+                    with httpx.Client(timeout=60, follow_redirects=True) as client:
+                        resp = getattr(client, method)(f"{BASE_URL}{path}", headers=h)
+                    if resp.status_code == 401:
+                        raise ClassevivaError("Sessione scaduta", 401)
+                    if resp.status_code != 200:
+                        continue
+                    ct = resp.headers.get("content-type", "").lower()
+                    # Valid binary file
+                    if resp.content[:4] == b"%PDF":
+                        filename = self._parse_cd_filename(resp.headers.get("content-disposition", ""))
+                        return resp.content, filename or fallback_name
+                    # Non-PDF binary (e.g. docx, zip)
+                    if "json" not in ct and "html" not in ct and "text/" not in ct and len(resp.content) > 500:
+                        filename = self._parse_cd_filename(resp.headers.get("content-disposition", ""))
+                        return resp.content, filename or fallback_name
+                    last_debug = resp.content[:2000]
+                except ClassevivaError:
+                    raise
+                except Exception:
+                    continue
+
+        # Save debug info
+        import json as _json
+        try:
+            with open("/tmp/classeviva_noticeboard_debug.json", "wb") as _f:
+                _f.write(last_debug)
+        except Exception:
+            pass
+
+        raise ClassevivaError(
+            "Impossibile scaricare l'allegato: il server non ha restituito dati validi.\n"
+            "Prova ad aprire questo avviso sul sito web Classeviva per sbloccare il download."
+        )
 
     def download_didactics_file(
         self, content_id: int, fallback_name: str = "file"
@@ -131,7 +232,18 @@ class ClassevivaClient:
                 f"Errore dal server (HTTP {resp.status_code}): {resp.text[:200]}",
                 resp.status_code,
             )
-        return resp.json()
+        try:
+            return resp.json()
+        except Exception:
+            return {}
+
+    @staticmethod
+    def _parse_cd_filename(cd: str) -> str:
+        for part in cd.split(";"):
+            part = part.strip()
+            if part.lower().startswith("filename="):
+                return part[9:].strip().strip('"').strip("'")
+        return ""
 
     def _post_bytes(self, path: str) -> tuple[bytes, str]:
         if not self._student_id:
@@ -146,12 +258,7 @@ class ClassevivaClient:
                 f"Errore download (HTTP {resp.status_code}): {resp.text[:200]}",
                 resp.status_code,
             )
-        cd = resp.headers.get("content-disposition", "")
-        filename = ""
-        for part in cd.split(";"):
-            part = part.strip()
-            if part.lower().startswith("filename="):
-                filename = part[9:].strip().strip('"').strip("'")
+        filename = self._parse_cd_filename(resp.headers.get("content-disposition", ""))
         return resp.content, filename
 
     def get_documents(self) -> list:
@@ -218,7 +325,17 @@ class ClassevivaClient:
 
     def get_noticeboard(self) -> list:
         data = self._get(f"/students/{self._student_id}/noticeboard")
-        return data.get("items", [])
+        items = data.get("items", [])
+        # Log full structure of first item with attachments for diagnostics
+        try:
+            import json as _json
+            with_att = [i for i in items if i.get("attachments")]
+            if with_att:
+                with open("/tmp/classeviva_noticeboard_item.json", "w") as _f:
+                    _json.dump(with_att[0], _f, indent=2)
+        except Exception:
+            pass
+        return items
 
     def get_didactics(self) -> list:
         data = self._get(f"/students/{self._student_id}/didactics")

@@ -1,10 +1,10 @@
 # Maintainer: giomarco2107 <giomarco2107@gmail.com>
 pkgname=linuxviva-git
-pkgver=r1.0
+pkgver=1
 pkgrel=1
 pkgdesc="Classeviva client for Linux — native GNOME app (GTK4 + libadwaita)"
 arch=('any')
-url="https://github.com/giomarco2107/linuxviva"
+url="https://github.com/Giovix64/linuxviva"
 license=('GPL-3.0-or-later')
 depends=(
   'python'
@@ -18,7 +18,7 @@ depends=(
 makedepends=('git' 'meson' 'ninja')
 provides=('linuxviva')
 conflicts=('linuxviva')
-source=("$pkgname::git+https://github.com/giomarco2107/linuxviva.git")
+source=("$pkgname::git+https://github.com/Giovix64/linuxviva.git")
 sha256sums=('SKIP')
 
 pkgver() {

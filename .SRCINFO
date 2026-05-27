@@ -1,8 +1,8 @@
 pkgbase = linuxviva-git
 	pkgdesc = Classeviva client for Linux — native GNOME app (GTK4 + libadwaita)
-	pkgver = r1.0
+	pkgver = 1
 	pkgrel = 1
-	url = https://github.com/giomarco2107/linuxviva
+	url = https://github.com/Giovix64/linuxviva
 	arch = any
 	license = GPL-3.0-or-later
 	makedepends = git
@@ -17,7 +17,7 @@ pkgbase = linuxviva-git
 	depends = webkitgtk-6.0
 	provides = linuxviva
 	conflicts = linuxviva
-	source = linuxviva-git::git+https://github.com/giomarco2107/linuxviva.git
+	source = linuxviva-git::git+https://github.com/Giovix64/linuxviva.git
 	sha256sums = SKIP
 
 pkgname = linuxviva-git

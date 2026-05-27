@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <!-- Background gradient: rich blue → deep indigo -->
+    <linearGradient id="bg" x1="0" y1="0" x2="0.25" y2="1">
+      <stop offset="0%"   stop-color="#5BA4F5"/>
+      <stop offset="100%" stop-color="#1B47C2"/>
+    </linearGradient>
+
+    <!-- Page gradient: pure white → very light blue-white -->
+    <linearGradient id="page" x1="0" y1="0" x2="0.1" y2="1">
+      <stop offset="0%"   stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#EEF4FF"/>
+    </linearGradient>
+
+    <!-- Badge gradient: green -->
+    <linearGradient id="badge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#4ADE80"/>
+      <stop offset="100%" stop-color="#16A34A"/>
+    </linearGradient>
+
+    <!-- Top highlight -->
+    <radialGradient id="highlight" cx="40%" cy="0%" r="70%">
+      <stop offset="0%"   stop-color="white" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Drop shadow filter -->
+    <filter id="shadow" x="-10%" y="-5%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4"
+                    flood-color="#0B2A80" flood-opacity="0.35"/>
+    </filter>
+
+    <!-- Badge glow -->
+    <filter id="badge-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3"
+                    flood-color="#14532D" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- ── Background squircle ── -->
+  <rect width="128" height="128" rx="28" ry="28" fill="url(#bg)"/>
+  <rect width="128" height="128" rx="28" ry="28" fill="url(#highlight)"/>
+
+  <!-- ── Register / grade book ── -->
+  <!-- Spine (left strip) -->
+  <rect x="18" y="17" width="13" height="88" rx="5" ry="5"
+        fill="#163A9E" opacity="0.75" filter="url(#shadow)"/>
+  <!-- Spine highlight -->
+  <rect x="18" y="17" width="5" height="88" rx="5" ry="5"
+        fill="white" opacity="0.12"/>
+
+  <!-- Pages block -->
+  <rect x="24" y="17" width="70" height="88" rx="5" ry="5"
+        fill="url(#page)" filter="url(#shadow)"/>
+
+  <!-- Page fold shadow on left edge -->
+  <rect x="24" y="17" width="7" height="88" rx="5" ry="5"
+        fill="#3B6FDD" opacity="0.13"/>
+
+  <!-- Page lines (rows of a grade register) -->
+  <!-- Header bar -->
+  <rect x="36" y="30" width="44" height="7" rx="2"
+        fill="#3B82F6" opacity="0.22"/>
+
+  <!-- Data lines -->
+  <rect x="36" y="46" width="44" height="3.5" rx="1.75" fill="#93C5FD" opacity="0.75"/>
+  <rect x="36" y="55" width="44" height="3.5" rx="1.75" fill="#93C5FD" opacity="0.75"/>
+  <rect x="36" y="64" width="44" height="3.5" rx="1.75" fill="#93C5FD" opacity="0.75"/>
+  <rect x="36" y="73" width="30" height="3.5" rx="1.75" fill="#93C5FD" opacity="0.55"/>
+
+  <!-- Vertical column separator (grade column) -->
+  <rect x="72" y="42" width="2" height="38" rx="1"
+        fill="#BFDBFE" opacity="0.7"/>
+
+  <!-- Small grade badges in the column -->
+  <rect x="76" y="44" width="16" height="7" rx="3.5"
+        fill="#3B82F6" opacity="0.3"/>
+  <rect x="76" y="53" width="16" height="7" rx="3.5"
+        fill="#3B82F6" opacity="0.3"/>
+  <rect x="76" y="62" width="16" height="7" rx="3.5"
+        fill="#3B82F6" opacity="0.3"/>
+
+  <!-- ── Green checkmark badge (bottom-right) ── -->
+  <circle cx="85" cy="91" r="22" fill="#0F3D1A" opacity="0.25"
+          filter="url(#badge-glow)"/>
+  <circle cx="85" cy="89" r="21" fill="url(#badge)"/>
+  <!-- Inner shine -->
+  <ellipse cx="82" cy="80" rx="12" ry="7" fill="white" opacity="0.2"/>
+
+  <!-- Checkmark -->
+  <path d="M 74 89 L 82 97 L 97 74"
+        fill="none" stroke="white" stroke-width="5"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+</svg>

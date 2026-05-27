@@ -6,7 +6,7 @@
 A native GNOME desktop client for the **Spaggiari Classeviva** electronic register,
 built with GTK4 + libadwaita.
 
-![License](https://img.shields.io/github/license/giomarco2107/linuxviva)
+![License](https://img.shields.io/github/license/Giovix64/linuxviva)
 ![Platform](https://img.shields.io/badge/platform-Linux-blue)
 ![GTK](https://img.shields.io/badge/GTK-4-green)
 
@@ -22,15 +22,16 @@ built with GTK4 + libadwaita.
 | **Voti** | Grades grouped by subject with per-period averages and circular ring badges; ↑/↓ trend indicators |
 | **Assenze** | Calendar heatmap + statistics (absences / delays / early exits) with justification status |
 | **Agenda** | Day-navigation view with colour-coded subject bars; separate homework/lessons sections |
-| **Bacheca** | Noticeboard with attachment download (marks as read automatically) |
+| **Bacheca** | Noticeboard with attachment download (auto read-confirmation before download) |
 | **Materiali** | Teacher-uploaded files, grouped by teacher, with one-tap download/open |
-| **Pagelle** | Downloadable PDF report cards + web report viewer with **auto-login** and **PDF export** |
+| **Pagelle** | Downloadable PDF report cards + **inline web report viewer** (WebKit) with auto-login and PDF export |
 
 ### Design
 - Fully adaptive (works at any window width)
 - Respects system dark/light mode via `AdwStyleManager`
 - Circular grade rings drawn with Cairo + Pango
 - Credentials stored securely in GNOME Keyring / Secret Service
+- Auto-login when credentials are saved
 
 ---
 
@@ -49,7 +50,7 @@ paru -S linuxviva-git
 ### Manual install (any distro)
 
 ```bash
-git clone https://github.com/giomarco2107/linuxviva.git
+git clone https://github.com/Giovix64/linuxviva.git
 cd linuxviva
 bash install.sh
 ```
@@ -59,7 +60,7 @@ This installs to `~/.local/` (no root required) and registers the app in your ap
 ### Build with Meson (system-wide)
 
 ```bash
-git clone https://github.com/giomarco2107/linuxviva.git
+git clone https://github.com/Giovix64/linuxviva.git
 cd linuxviva
 meson setup builddir --prefix=/usr
 meson compile -C builddir
@@ -100,7 +101,7 @@ sudo apt install python3 python3-gi gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-webkit-6.
 ## Running from source
 
 ```bash
-git clone https://github.com/giomarco2107/linuxviva.git
+git clone https://github.com/Giovix64/linuxviva.git
 cd linuxviva
 python3 src/main.py
 ```
@@ -115,6 +116,8 @@ linuxviva/
 ├── install.sh          ← quick local install (no root needed)
 ├── PKGBUILD            ← AUR package
 ├── data/
+│   ├── icons/hicolor/scalable/apps/
+│   │   └── io.github.giomarco2107.LinuxViva.svg  ← app icon
 │   ├── linuxviva.in    ← launcher wrapper template
 │   └── io.github.giomarco2107.LinuxViva.desktop
 └── src/
@@ -146,4 +149,4 @@ Pull requests are welcome! Please open an issue first to discuss what you'd like
 
 ## License
 
-[GPL-3.0](LICENSE) — © 2024 giomarco2107
+[GPL-3.0](LICENSE) — © 2025 Giovix64
