@@ -6,6 +6,9 @@ import threading
 import os
 import subprocess
 import json
+from urllib.parse import urlparse
+
+from api.client import Z_DEV_APIKEY
 
 try:
     gi.require_version("WebKit", "6.0")
@@ -267,7 +270,7 @@ class ScrutiniView(Adw.Bin):
             hdrs = req.get_http_headers()
             if token:
                 hdrs.replace("Z-Auth-Token", token)
-            hdrs.replace("Z-Dev-Apikey", "Tg1NWEwNGIgIC0K")
+            hdrs.replace("Z-Dev-Apikey", Z_DEV_APIKEY)
             self._webview.load_request(req)
 
         self._nav.push_by_tag("viewer")
@@ -305,6 +308,12 @@ class ScrutiniView(Adw.Bin):
         if self._autofill_done or not self._username or not self._password:
             return
         uri = wv.get_uri() or ""
+        try:
+            host = urlparse(uri).hostname or ""
+        except Exception:
+            return
+        if not host.endswith("spaggiari.eu"):
+            return
         if not any(k in uri.lower() for k in ("login", "dologin", "accedi", "auth")):
             return
         self._autofill_done = True

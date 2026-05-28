@@ -5,9 +5,10 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 BASE_URL = "https://web.spaggiari.eu/rest/v1"
+Z_DEV_APIKEY = "Tg1NWEwNGIgIC0K"
 _BASE_HEADERS = {
     "User-Agent": "CVVS/std/4.2.3 Android/10",
-    "Z-Dev-Apikey": "Tg1NWEwNGIgIC0K",
+    "Z-Dev-Apikey": Z_DEV_APIKEY,
     "Content-Type": "application/json",
 }
 
@@ -194,14 +195,6 @@ class ClassevivaClient:
                 except Exception:
                     continue
 
-        # Save debug info
-        import json as _json
-        try:
-            with open("/tmp/classeviva_noticeboard_debug.json", "wb") as _f:
-                _f.write(last_debug)
-        except Exception:
-            pass
-
         raise ClassevivaError(
             "Impossibile scaricare l'allegato: il server non ha restituito dati validi.\n"
             "Prova ad aprire questo avviso sul sito web Classeviva per sbloccare il download."
@@ -308,13 +301,6 @@ class ClassevivaClient:
     def get_absences(self) -> list:
         data = self._get(f"/students/{self._student_id}/absences/details")
         events = data.get("events") or data.get("absences") or []
-        # Write raw codes to /tmp for debugging if counters appear wrong
-        try:
-            import json as _json
-            with open("/tmp/classeviva_absences_debug.json", "w") as _f:
-                _json.dump(events[:10], _f, indent=2)
-        except Exception:
-            pass
         return events
 
     def get_agenda(self, days_back: int = 7, days_forward: int = 30) -> list:
@@ -326,15 +312,6 @@ class ClassevivaClient:
     def get_noticeboard(self) -> list:
         data = self._get(f"/students/{self._student_id}/noticeboard")
         items = data.get("items", [])
-        # Log full structure of first item with attachments for diagnostics
-        try:
-            import json as _json
-            with_att = [i for i in items if i.get("attachments")]
-            if with_att:
-                with open("/tmp/classeviva_noticeboard_item.json", "w") as _f:
-                    _json.dump(with_att[0], _f, indent=2)
-        except Exception:
-            pass
         return items
 
     def get_didactics(self) -> list:
